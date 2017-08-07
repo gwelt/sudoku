@@ -1,5 +1,6 @@
 module.exports = {solve : solve};
-function log(message) {if (0) {console.log('LOG '+message)}};
+var maxruns=1500;
+function log(message) {if (1) {console.log('LOG '+message)}};
 function debug(message) {if (0) {console.log('DEBUG '+message)}};
 
 function solve(puzzle) {
@@ -10,7 +11,7 @@ function solve(puzzle) {
 function solve_recursive(data) {
   data.stats.runs++;
   for (var pos=0; pos<81; pos++) {data.options.push([1,2,3,4,5,6,7,8,9])};
-  return select_positions_and_try_its_options(
+  return recursively_select_position_and_try_its_options(
            set_all_candidates_that_only_occur_once_in_a_group(
              parse_puzzle(data)
            )
@@ -70,9 +71,9 @@ function set(data,pos,candidate) {
 }
 
 function set_all_candidates_that_only_occur_once_in_a_group(data) {
-  data.stats.crunch_groups++;
   var success=true;
   while ((success)) {
+    data.stats.crunch_groups++;
     success=false;
     groups.forEach((group)=>{
       [1,2,3,4,5,6,7,8,9].forEach((candidate)=>{
@@ -93,7 +94,8 @@ function set_all_candidates_that_only_occur_once_in_a_group(data) {
   return data;
 }
 
-function select_positions_and_try_its_options(data) {
+function recursively_select_position_and_try_its_options(data) {
+  // if solved, save solution
   if ((!data.errors.length) && (data.options.every((o)=>{return o.length==1})))
   {
     log('solved: '+generate_puzzle_from_options(data.options));
@@ -103,28 +105,40 @@ function select_positions_and_try_its_options(data) {
   }
 
   // create puzzle-strings for all options of one (random) position
-  var puzzles_to_check=[];
   var current_puzzle=generate_puzzle_from_options(data.options);
+  var puzzles_to_check=[];
   var counter=0;
-  for (var pos = 0; pos < data.options.length; pos++) {
-    if (data.options[pos].length>1) {
-      data.options[pos].forEach((guess)=>{
-        counter++;
-        var new_puzzle=current_puzzle.substr(0,pos)+guess+current_puzzle.substr(pos+1,current_puzzle.length-pos-1);
-        puzzles_to_check.push({puzzle:new_puzzle, id:counter});
-      })
-      // we only have to try one position - it should only have one valid candidate
-      pos=data.options.length;
-    }
+
+  var positions_with_options=[];
+  for (var pos = 0; pos < data.options.length; pos++) {if (data.options[pos].length>1) {positions_with_options.push(pos)}}
+  if (positions_with_options.length) {
+    var pos=positions_with_options[Math.floor(Math.random()*positions_with_options.length)];
+    log('Trying position '+pos+' with options '+data.options[pos]+'.');
+    data.options[pos].forEach((guess)=>{
+      counter++;
+      var new_puzzle=current_puzzle.substr(0,pos)+guess+current_puzzle.substr(pos+1,current_puzzle.length-pos-1);
+      puzzles_to_check.push({puzzle:new_puzzle, id:counter});
+    })
   }
   
-  if (puzzles_to_check.length) {log(data.stats.dig+' [ '+puzzles_to_check.length+' ] '+current_puzzle)} 
-  for (var i = 0; i < puzzles_to_check.length; i++) {
-    log(data.stats.dig+' ['+puzzles_to_check[i].id+'/'+puzzles_to_check.length+'] '+puzzles_to_check[i].puzzle);
-    // deep search +1
-    data.stats.dig++;
-    solve_recursive({puzzle:puzzles_to_check[i].puzzle, options:[], solutions:data.solutions, errors:[], stats:data.stats});
-    data.stats.dig--;
+  // solve puzzle-strings until all possibilities are checked...
+  //if ((puzzles_to_check.length)&&(data.stats.runs<=maxruns)&&(data.solutions.length<=1)) {
+  if (puzzles_to_check.length) {
+    log(data.stats.dig+' [ '+puzzles_to_check.length+' ] '+current_puzzle);
+    for (var i = 0; i < puzzles_to_check.length; i++) {
+      // ...or timeout (maxruns) or more than one solution found
+      if ((data.stats.runs<=maxruns)&&(data.solutions.length<=1))
+      {
+        log(data.stats.dig+' ['+puzzles_to_check[i].id+'/'+puzzles_to_check.length+'] '+puzzles_to_check[i].puzzle);
+        data.stats.dig++;
+        solve_recursive({puzzle:puzzles_to_check[i].puzzle, options:[], solutions:data.solutions, errors:[], stats:data.stats});
+        data.stats.dig--;
+      } else {
+        i=puzzles_to_check.length;
+        if (data.stats.runs>maxruns) {data.errors.push('EXCEED-ERROR. Tried for a long time now. (maxruns='+maxruns+') Aborted without solution.')}
+        if (data.solutions.length>1) {data.errors.push('NOT-A-VALID-SUDOKU-ERROR. Found more than one solution. (found '+data.solutions.length+' and aborted)')}
+      }
+    }
   }
   
   data.stats.end=Date.now();
