@@ -1,12 +1,12 @@
 var sudoku = require('./sudoku_solver.js');
-//console.log(sudoku.solve('3--1----418-4-23--46-73-12-2-635-4-1-53641-728142--635531-26-4-6---74513-4-5132-6'));
-//console.log(sudoku.solve('------8--45-28-----26--3-----8--4---7----6-1-3-25--------1--7---9-----6-------534'));
+console.log(sudoku.solve('--------25---4---------369---8-5---9-32--97---1--8-3----16---3----5-----82-9-----'));
 //console.log(sudoku.solve('---------------------------------------------------------------------------------'));
 
+/*
 console.oldLog = console.log; var consolelog=''; console.log = function(value) {console.oldLog(value); consolelog+=value+'\n';};
 
-//for (var i=0; i<get_sudoku_samples().length; i++)
-var i=0;
+for (var i=1; i<get_sudoku_samples().length; i++)
+//var i=0;
 {
   var r=i;
   //var r=Math.floor(Math.random()*get_sudoku_samples().length);

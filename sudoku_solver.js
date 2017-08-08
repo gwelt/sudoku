@@ -1,10 +1,10 @@
 module.exports = {solve : solve};
-var maxruns=1500;
-function log(message) {if (1) {console.log('LOG '+message)}};
+var maxruns=500;
+function log(message) {if (0) {console.log('LOG '+message)}};
 function debug(message) {if (0) {console.log('DEBUG '+message)}};
 
 function solve(puzzle) {
-  var data={puzzle:puzzle, options:[], solutions:[], errors:[], stats:{dig:0, runs:0, crunch_numbers:0, crunch_groups:0, start:Date.now()}};
+  var data={puzzle:puzzle+'', options:[], solutions:[], errors:[], stats:{dig:0, runs:0, crunch_numbers:0, crunch_groups:0, start:Date.now()}};
   return solve_recursive(data);
 }
 
@@ -127,7 +127,7 @@ function recursively_select_position_and_try_its_options(data) {
     log(data.stats.dig+' [ '+puzzles_to_check.length+' ] '+current_puzzle);
     for (var i = 0; i < puzzles_to_check.length; i++) {
       // ...or timeout (maxruns) or more than one solution found
-      if ((data.stats.runs<=maxruns)&&(data.solutions.length<=1))
+      if ((data.stats.runs<maxruns)&&(data.solutions.length<=1))
       {
         log(data.stats.dig+' ['+puzzles_to_check[i].id+'/'+puzzles_to_check.length+'] '+puzzles_to_check[i].puzzle);
         data.stats.dig++;
@@ -135,12 +135,12 @@ function recursively_select_position_and_try_its_options(data) {
         data.stats.dig--;
       } else {
         i=puzzles_to_check.length;
-        if (data.stats.runs>maxruns) {data.errors.push('EXCEED-ERROR. Tried for a long time now. (maxruns='+maxruns+') Aborted without solution.')}
-        if (data.solutions.length>1) {data.errors.push('NOT-A-VALID-SUDOKU-ERROR. Found more than one solution. (found '+data.solutions.length+' and aborted)')}
       }
     }
   }
   
+  if (data.stats.runs>maxruns) {data.errors.push('EXCEED-ERROR. Tried for a long time now. (maxruns='+maxruns+') Aborted without solution.')}
+  if (data.solutions.length>1) {data.errors.push('NOT-A-VALID-SUDOKU-ERROR. Found more than one solution. (found '+data.solutions.length+' and aborted)')}
   data.stats.end=Date.now();
   return data;
 }
