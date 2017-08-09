@@ -1,13 +1,41 @@
 var sudoku_solver = require('./sudoku_solver.js');
 //console.oldLog = console.log; var consolelog=''; console.log = function(value) {console.oldLog(value); consolelog+=value+'\n';};
 
-var i=0;
-while (i<500) {
-  i++;
-  generate_puzzle_base(generate_random_sudoku(),(p)=>what_to_do_with_generated_puzzle(p));
+var sudokus=[];
+var number_of_sudokus=50;
+
+var t1=Date.now();
+
+console.log('GENERATED SODOKUS: 0/'+number_of_sudokus);
+for (var i = 1; i <= number_of_sudokus; i++) {
+
+  var sudoku='';
+  generate_random_sudoku(
+    (s)=>generate_puzzle_base(s,
+    	(s,p)=>reduce_puzzle(s,p,
+    		(s,p)=>save_puzzle(s,p)
+    	)
+    )
+  );
+
 }
 
-function what_to_do_with_generated_puzzle(puzzle) {
+console.log(sudokus);
+console.log(number_of_sudokus+' sudokus generated in '+(Date.now()-t1)+'ms');  
+
+//var fs = require('fs'); fs.writeFile("sudokus.txt", JSON.stringify(sudokus), function(err) {if(err) {return console.log(err);} console.log("Sudokus saved in sudokus.txt");}); 
+
+function save_puzzle(sudoku,puzzle) {
+  sudokus.push([puzzle,sudoku]);
+  var bar='';
+  var bar_width=25;
+  var progress=Math.floor(i/number_of_sudokus*bar_width);
+  for (var b = 1; b <= progress; b++) {bar+='\u2588'}
+  for (var b = 1; b <= bar_width-progress; b++) {bar+='\u2591'}
+  console.log('\033[1AGENERATED SUDOKUS: '+bar+' '+i+'/'+number_of_sudokus);
+}
+
+function reduce_puzzle(sudoku,puzzle,callback) {
   // remove any of the hints (in random order) if it solves without it
   var hintpos=[];
   for (var i=0; i<puzzle.length; i++) {if (puzzle[i]!='-') {hintpos.push(i)}}
@@ -22,21 +50,13 @@ function what_to_do_with_generated_puzzle(puzzle) {
     };
     pos=hintpos.pop();
   }
-  //console.log(puzzle);
-  var hintcount=0;
-  for (var i=0; i<puzzle.length; i++) {if (puzzle[i]!='-') {hintcount++}};
-  console.log(puzzle+' ('+hintcount+' hints)');
-  //var s=sudoku_solver.solve(puzzle);
-  //console.log(JSON.stringify(s));
-  //console.log(print_2d(puzzle));
+  callback(sudoku,puzzle);
 }
-
-//var fs = require('fs'); fs.writeFile("result.txt", consolelog, function(err) {if(err) {return console.log(err);} console.log("Result saved in result.txt");}); 
 
 function generate_puzzle_base(sudoku,callback,hints,tries,current_try) {
   // only pick sudoku-numbers from n random positions (all others are "-")
   var puzzle='', mask=[];
-  if ((!hints)||(hints<17)) {hints=40};
+  if ((!hints)||(hints<17)) {hints=32};
   if (!current_try) {current_try=1};
   if (!tries) {tries=5};
   // create a list of numbers 0 to 80
@@ -53,7 +73,7 @@ function generate_puzzle_base(sudoku,callback,hints,tries,current_try) {
   //console.log('\033[2A');
   if (s.solutions.length==1) {
     //console.log();
-    callback(puzzle);
+    return callback(sudoku,puzzle);
   } else {
     if (current_try>=tries) {++hints, current_try=0}
     generate_puzzle_base(sudoku,callback,hints,tries,++current_try);
@@ -71,15 +91,15 @@ function shuffle_list(list) {
   return list;
 }
 
-function generate_random_sudoku() {
+function generate_random_sudoku(callback) {
   var s={solutions:[]}, i=0;
-  while ((i<15)&&(!s.solutions.length)) {
+  while ((i<25)&&(!s.solutions.length)) {
     i++;
     s=sudoku_solver.solve();
     //console.log(s.solutions[0]+' ('+s.stats.runs+' runs)');
   }
   //console.log(print_2d(s.solutions[0]));
-  return s.solutions[0];
+  callback(s.solutions[0]);
 }
 
 function print_2d(puzzle) {
