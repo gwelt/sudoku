@@ -1,29 +1,18 @@
+module.exports = {generate : generate};
 var sudoku_solver = require('./sudoku_solver.js');
 //console.oldLog = console.log; var consolelog=''; console.log = function(value) {console.oldLog(value); consolelog+=value+'\n';};
 
-var sudokus=[];
-var number_of_sudokus=50;
-
-var t1=Date.now();
-
-console.log('GENERATED SODOKUS: 0/'+number_of_sudokus);
-for (var i = 1; i <= number_of_sudokus; i++) {
-
-  var sudoku='';
+function generate() {
+  var result=[];
   generate_random_sudoku(
     (s)=>generate_puzzle_base(s,
-    	(s,p)=>reduce_puzzle(s,p,
-    		(s,p)=>save_puzzle(s,p)
-    	)
+      (s,p)=>reduce_puzzle(s,p,
+        (s,p)=>{result.push(p,s)}
+      )
     )
   );
-
+  return result;
 }
-
-console.log(sudokus);
-console.log(number_of_sudokus+' sudokus generated in '+(Date.now()-t1)+'ms');  
-
-//var fs = require('fs'); fs.writeFile("sudokus.txt", JSON.stringify(sudokus), function(err) {if(err) {return console.log(err);} console.log("Sudokus saved in sudokus.txt");}); 
 
 function save_puzzle(sudoku,puzzle) {
   sudokus.push([puzzle,sudoku]);
