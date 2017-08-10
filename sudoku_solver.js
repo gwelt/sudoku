@@ -1,5 +1,5 @@
 module.exports = {solve : solve};
-var maxruns=250;
+var maxruns=150;
 function log(message) {if (0) {console.log('LOG '+message)}};
 function debug(message) {if (0) {console.log('DEBUG '+message)}};
 
