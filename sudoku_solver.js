@@ -63,7 +63,7 @@ function set(data,pos,candidate) {
         // if there is only one option left after removing > call set
         if (data.options[dep_pos].length==1) {
           debug(data.options[dep_pos][0]+' is the only candidate left at position '+dep_pos+'.');
-          set(data,dep_pos,data.options[dep_pos][0]);
+          return set(data,dep_pos,data.options[dep_pos][0]);
         }
       }
     }

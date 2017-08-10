@@ -12,21 +12,22 @@ if (process.argv[2]&&(process.argv[2].length==81)) {
   var s=sudoku_solver.solve(process.argv[2]);
   if (s.solutions[0]) {
     var hints=s.puzzle.split('').map((c)=>{return c=='-'?0:1}).reduce((l,r)=>{return l+r},0);
-    console.log('\nPUZZLE:\n'+print_2d(s.puzzle)+'\n\nSOLUTION:\n'+print_2d(s.solutions[0])+'\nRATING: '+s.stats.dig_needed+'/'+hints+'\n');
+    console.log('\nPUZZLE:\n'+print_2d(s.puzzle)+'\n\nSOLUTION:\n'+print_2d(s.solutions[0])+'\nRATING: '+s.stats.dig_needed+'.'+hints+'\n');
   }
   else {console.log(s.errors)}
 }
 
 for (var i = 1; i <= number_of_sudokus; i++) {
   update_progress_bar('GENERATING: ',i,number_of_sudokus);
-  sudokus.push(sudoku_generator.generate());
+  //sudokus.push(sudoku_generator.generate());
+  sudokus.push(sudoku_generator.generate_with_masks());
   update_progress_bar('GENERATING: ',i,number_of_sudokus);
 }
 
 if (number_of_sudokus==1) {
   var hints=sudokus[0][0].split('').map((c)=>{return c=='-'?0:1}).reduce((l,r)=>{return l+r},0);
   var s=sudoku_solver.solve(sudokus[0][0]);
-  console.log('\nPUZZLE:\n'+print_2d(sudokus[0][0])+'\n\nSOLUTION:\n'+print_2d(sudokus[0][1])+'\nRATING: '+s.stats.dig_needed+'/'+hints+'\n');
+  console.log('\nPUZZLE:\n'+print_2d(sudokus[0][0])+'\n\nSOLUTION:\n'+print_2d(sudokus[0][1])+'\nRATING: '+s.stats.dig_needed+'.'+hints+'\n');
 }
 else if (number_of_sudokus>1) {
   console.log(sudokus);

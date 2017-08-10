@@ -1,4 +1,4 @@
-module.exports = {generate : generate};
+module.exports = {generate : generate, generate_with_masks : generate_with_masks};
 var sudoku_solver = require('./sudoku_solver.js');
 
 function generate() {
@@ -10,6 +10,45 @@ function generate() {
       )
     )
   );
+  return result;
+}
+
+function generate_with_masks(masks) {
+  var alt_result=generate();
+  var result=[];
+  var c=0;
+
+  while ((!result.length)&&(c<64)) {
+	c++;
+	// generate random sudoku
+	generate_random_sudoku((sudoku)=>{
+  	  // apply mask on sudoku
+	  if (!masks) {
+	  	masks=[
+	  	  [0,4,8,12,14,20,21,23,24,28,29,33,34,36,44,46,47,51,52,56,57,59,60,66,68,72,76,80],
+	  	  [3,5,11,13,15,19,25,27,30,32,35,37,43,45,48,50,53,55,61,65,67,69,75,77],
+	  	  [2,3,5,6,12,14,18,26,27,28,34,35,45,46,52,53,54,62,66,68,74,75,77,78],
+	  	  [0,8,11,12,13,14,15,19,25,28,30,32,34,37,43,46,48,50,52,55,61,65,66,67,68,69,72,80],
+	  	  [2,6,10,12,14,16,18,21,23,26,28,29,33,34,46,47,51,52,54,57,59,62,64,66,68,70,74,78],
+	  	  [0,8,11,13,15,19,21,23,25,29,31,33,37,39,41,43,47,49,51,55,57,59,61,65,67,69,72,80]
+	    ];
+        // create a list of numbers 0 to 80 and take only the first n numbers of shuffled_numbers
+        // var m=[]; for (var i=0; i<81; i++) {m.push(i)}; masks.push(shuffle_list(m).slice(0,42));
+	  }
+      masks.forEach((m)=>{
+	    var puzzle='';
+	    for (var i=0; i<81; i++) {if (m.indexOf(i)>=0) {puzzle+=sudoku[i]} else {puzzle+='-'}};
+	  	//console.log((c++)+' '+puzzle);
+		// try solving the puzzle
+		if (sudoku_solver.solve(puzzle).solutions.length==1) {
+	      //console.log('RESULT: '+result);
+		  result.push(puzzle,sudoku);
+	  	}
+      });
+	});
+  }
+  
+  if (!result.length) {result=alt_result}
   return result;
 }
 
