@@ -31,7 +31,7 @@ if (number_of_sudokus==1) {
 }
 else if (number_of_sudokus>1) {
   console.log(sudokus);
-  var fs = require('fs'); fs.writeFile("sudokus.txt", JSON.stringify(sudokus), function(err) {if(err) {return console.log(err);} console.log("Sudokus saved in sudokus.txt");}); 
+  var fs = require('fs'); fs.appendFile("sudokus.txt", JSON.stringify(sudokus), function(err) {if(err) {return console.log(err);} console.log("Sudokus saved in sudokus.txt");}); 
 } 
 
 var start_time=false;

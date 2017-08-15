@@ -63,6 +63,7 @@ function set(data,pos,candidate) {
         // if there is only one option left after removing > call set
         if (data.options[dep_pos].length==1) {
           debug(data.options[dep_pos][0]+' is the only candidate left at position '+dep_pos+'.');
+          //setTimeout(()=>{set(data,dep_pos,data.options[dep_pos][0])},0); // use setTimeout to free stack...?
           return set(data,dep_pos,data.options[dep_pos][0]);
         }
       }
@@ -140,6 +141,7 @@ function recursively_select_position_and_try_its_options(data) {
   }
   
   if (data.stats.runs>maxruns) {data.errors.push('EXCEED-ERROR. Tried for a long time now. (maxruns='+maxruns+') Aborted without solution.')}
+  if (data.errors.length) {data.solutions=[]}
   if (data.solutions.length>1) {data.errors.push('NOT-A-VALID-SUDOKU-ERROR. Found more than one solution. (found '+data.solutions.length+' and aborted)')}
   data.stats.end=Date.now();
   return data;
