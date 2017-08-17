@@ -1,11 +1,17 @@
 {
   "name": "sudoku",
   "version": "1.0.0",
-  "description": "Sudoku generator",
+  "description": "Sudoku solver, generator and websocket-server",
   "main": "sudoku.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "bufferutil": "1.2.1",
+    "express": "4.13.4",
+    "utf-8-validate": "1.2.1",
+    "ws": "1.1.0"
+  }  
 }
