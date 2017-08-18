@@ -6,7 +6,7 @@ var sudoku_generator = require('./sudoku_generator.js');
 
 var sudokus=[];
 var number_of_sudokus=process.argv[2]*1;
-if (500>=number_of_sudokus<=0) {number_of_sudokus=1}
+if (5000>=number_of_sudokus<=0) {number_of_sudokus=1}
 if (process.argv[2]&&(process.argv[2].length==81)) {
   number_of_sudokus=0;
   var s=sudoku_solver.solve(process.argv[2]);
@@ -19,8 +19,13 @@ if (process.argv[2]&&(process.argv[2].length==81)) {
 
 for (var i = 1; i <= number_of_sudokus; i++) {
   update_progress_bar('GENERATING: ',i,number_of_sudokus);
-  //sudokus.push(sudoku_generator.generate());
-  sudokus.push(sudoku_generator.generate_with_masks());
+  var p=sudoku_generator.generate();
+  var s=sudoku_solver.solve(p[0]);
+  var hints=s.puzzle.split('').map((c)=>{return c=='-'?0:1}).reduce((l,r)=>{return l+r},0);
+  var rating=s.stats.dig_needed+'.'+hints;
+  var time=(s.stats.end-s.stats.start)+'ms';
+  sudokus.push({puzzle:s.puzzle, solution:s.solutions[0], time:time, rating:rating});
+  //sudokus.push(sudoku_generator.generate_with_masks());
   update_progress_bar('GENERATING: ',i,number_of_sudokus);
 }
 
@@ -31,7 +36,10 @@ if (number_of_sudokus==1) {
 }
 else if (number_of_sudokus>1) {
   console.log(sudokus);
-  var fs = require('fs'); fs.appendFile("sudokus.txt", JSON.stringify(sudokus), function(err) {if(err) {return console.log(err);} console.log("Sudokus saved in sudokus.txt");}); 
+  var text='';
+  sudokus.forEach((s)=>{text+=s.puzzle+' '+s.rating+' '+s.time+'\n'})
+  var fs = require('fs'); fs.writeFile("sudokus.txt", text, function(err) {if(err) {return console.log(err);} console.log("Sudokus saved in sudokus.txt");}); 
+  var fs = require('fs'); fs.writeFile("sudokus.json", JSON.stringify(sudokus), function(err) {if(err) {return console.log(err);} console.log("Sudokus saved in sudokus.json");}); 
 } 
 
 var start_time=false;
