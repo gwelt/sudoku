@@ -6,7 +6,7 @@ var sudoku_generator = require('./sudoku_generator.js');
 
 var sudokus=[];
 var number_of_sudokus=process.argv[2]*1;
-if (5000>=number_of_sudokus<=0) {number_of_sudokus=1}
+if (20000>=number_of_sudokus<=0) {number_of_sudokus=1}
 if (process.argv[2]&&(process.argv[2].length==81)) {
   number_of_sudokus=0;
   var s=sudoku_solver.solve(process.argv[2]);
@@ -35,11 +35,12 @@ if (number_of_sudokus==1) {
   console.log('\nPUZZLE:\n'+print_2d(sudokus[0][0])+'\n\nSOLUTION:\n'+print_2d(sudokus[0][1])+'\nRATING: '+s.stats.dig_needed+'.'+hints+'\n');
 }
 else if (number_of_sudokus>1) {
-  console.log(sudokus);
   var text='';
   sudokus.forEach((s)=>{text+=s.puzzle+' '+s.rating+' '+s.time+'\n'})
-  var fs = require('fs'); fs.writeFile("sudokus.txt", text, function(err) {if(err) {return console.log(err);} console.log("Sudokus saved in sudokus.txt");}); 
-  var fs = require('fs'); fs.writeFile("sudokus.json", JSON.stringify(sudokus), function(err) {if(err) {return console.log(err);} console.log("Sudokus saved in sudokus.json");}); 
+  //console.log(sudokus);
+  //console.log(text);
+  var fs = require('fs'); fs.appendFile("sudokus.txt", text, function(err) {if(err) {return console.log(err);} console.log("Sudokus saved in sudokus.txt");}); 
+  //var fs = require('fs'); fs.writeFile("sudokus.json", JSON.stringify(sudokus), function(err) {if(err) {return console.log(err);} console.log("Sudokus saved in sudokus.json");}); 
 } 
 
 var start_time=false;
@@ -51,8 +52,21 @@ function update_progress_bar(text,current,max) {
     var bar='';
     for (var b = 1; b <= progress; b++) {bar+='\u2588'}
     for (var b = 1; b <= bar_width-progress; b++) {bar+='\u2591'}
-    console.log('\033[1A'+text+bar+' '+current+'/'+max+' '+(Date.now()-start_time)/1000+'s   ');    
+    var time=((Date.now()-start_time)/1000).toFixed(3);
+    var display_time=time+'s';
+    if (time>0) {display_time=seconds_to_min_sec(time)}
+    var per_minute=Math.floor(60*current/time);
+    var time_estimated=seconds_to_min_sec(max*time/current);
+    console.log('\033[1A'+text+bar+' '+current+'/'+max+' '+per_minute+'/min '+display_time+'/'+time_estimated+'      ');
   }
+}
+function seconds_to_min_sec (s) {
+  if (s>0)
+  {
+    var min=Math.floor(s/60);
+    var sec=Math.floor(s%60); if (sec<10) {sec='0'+sec};
+    return min+':'+sec;
+  } else {return '%'}
 }
 
 function print_2d(puzzle) {
