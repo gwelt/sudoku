@@ -25,20 +25,15 @@ for (var i = 1; i <= number_of_sudokus; i++) {
   var rating=s.stats.dig_needed+'.'+hints;
   var time=(s.stats.end-s.stats.start)+'ms';
   sudokus.push({puzzle:s.puzzle, solution:s.solutions[0], time:time, rating:rating});
-  //sudokus.push(sudoku_generator.generate_with_masks());
   update_progress_bar('GENERATING: ',i,number_of_sudokus);
 }
 
 if (number_of_sudokus==1) {
-  var hints=sudokus[0][0].split('').map((c)=>{return c=='-'?0:1}).reduce((l,r)=>{return l+r},0);
-  var s=sudoku_solver.solve(sudokus[0][0]);
-  console.log('\nPUZZLE:\n'+print_2d(sudokus[0][0])+'\n\nSOLUTION:\n'+print_2d(sudokus[0][1])+'\nRATING: '+s.stats.dig_needed+'.'+hints+'\n');
+  console.log('\nPUZZLE:\n'+print_2d(sudokus[0].puzzle)+'\n\nSOLUTION:\n'+print_2d(sudokus[0].solution)+'\nRATING: '+sudokus[0].rating+'\n');
 }
 else if (number_of_sudokus>1) {
   var text='';
   sudokus.forEach((s)=>{text+=s.puzzle+' '+s.rating+' '+s.time+'\n'})
-  //console.log(sudokus);
-  //console.log(text);
   var fs = require('fs'); fs.appendFile("sudokus.txt", text, function(err) {if(err) {return console.log(err);} console.log("Sudokus saved in sudokus.txt");}); 
   //var fs = require('fs'); fs.writeFile("sudokus.json", JSON.stringify(sudokus), function(err) {if(err) {return console.log(err);} console.log("Sudokus saved in sudokus.json");}); 
 } 
