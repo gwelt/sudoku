@@ -12,6 +12,7 @@ const server = express()
     res.setHeader('Access-Control-Allow-Origin','*');
     if (req.url=="/") {res.sendFile(INDEX)}
     if (req.url=="/sudoku_client.js") {res.sendFile(CLIENTJS)}
+    if (req.url=="/new") {res.send(new Sudoku().puzzle);}
   })
   .listen(PORT, function() {process.stdout.write(`\x1b[44m SUDOKU SERVER LISTENING ON PORT ${ PORT } \x1b[0m `)});
 const wss = new SocketServer({ server });
@@ -22,48 +23,65 @@ var sudokuID=0;
 
 ///--- SUDOKU-CLASS ---///
 function Sudoku() {
-  sudokus.pop();
+  //sudokus.pop();
   sudokus.push(this);
   this.id=++sudokuID;
   var sudoku=sudoku_generator.generate();
   this.puzzle=sudoku[0];
-  this.solution=sudoku[1];
+  //this.solution=sudoku[1];
   this.init();
 }
 
 Sudoku.prototype.init = function () {
   this.user_puzzle=this.puzzle;
-  broadcast(JSON.stringify(sudokus));
+  broadcast(this);
 }
 
 Sudoku.prototype.set = function (pos,digit) {
   var new_user_puzzle=this.user_puzzle.substr(0,pos)+digit+this.user_puzzle.substr(pos+1,81-pos-1);
   this.user_puzzle=new_user_puzzle;
-  console.log('SET: '+pos+'='+digit);
-  broadcast(JSON.stringify(sudokus));
+  //log('SET #'+this.id+': '+pos+'='+digit);
+  broadcast(this);
 }
 
 new Sudoku();
 
 ///--- CONNECTION-HANDLER ---///
-function broadcast(text) {try{wss.clients.forEach((ws) => {ws.send(text)})} catch(err){};}
+function broadcast(sudoku) {try{wss.clients.forEach((ws) => {
+  if (sudoku.id==ws.current_sudoku) {ws.send('['+JSON.stringify(sudoku)+']')}})
+} catch(err){};}
+
 wss.on('connection', (ws) => {
-  //var current_sudoku = sudokus.find(s => s.id === 1);
+  ws.current_sudoku=false;
   ws.on('message', (msg) => {
     var request='';
     try {
-      console.log('JSON: '+msg);
       request=JSON.parse(msg);
-      request.pos=parseInt(request.pos);
-      request.digit=parseInt(request.digit);
-      if (80>request.pos<0) {request=''}
-      if (10>request.digit<1) {request=''}
-      if (request != '') {sudokus[0].set(request.pos,request.digit)};
+      var sudoku=sudokus.find(s => s.id == request.id);
+      if (sudoku) {
+        // save as current_sudoku for this client
+        ws.current_sudoku=sudoku.id;
+        // set
+        request.pos=parseInt(request.pos);
+        request.digit=parseInt(request.digit);
+        if (!isNaN(request.pos) && !isNaN(request.digit) && (-1>request.pos<81) && (0>request.digit<10)) {
+          sudoku.set(request.pos,request.digit)
+        } 
+        else {
+          ws.send('['+JSON.stringify(sudoku)+']');
+        }
+      }
+      // send complete dataset
+      else {
+        //log('THERE IS NO SUDOKU WITH ID '+request.id+'. SENDING COMPLETE DATASET.');
+        ws.send(JSON.stringify(sudokus));
+      }
     } catch (e) {
-      console.log('INPUT: '+msg);
-      if (msg=='STATUS') {ws.send(JSON.stringify(sudokus))}
-      else if (msg=='INIT') {sudokus[0].init()}
-      else if (msg=='NEW') {new Sudoku()}
+      //log(e);
     }
   });
 });
+
+function log(m) {
+  console.log(m);
+}
