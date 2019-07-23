@@ -1,16 +1,23 @@
 {
   "name": "sudoku",
   "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gwelt/sudoku"
+  },
   "description": "Sudoku solver, generator and websocket-server",
   "main": "sudoku.js",
   "scripts": {
+    "start": "node sudoku_server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.19.0",
     "bufferutil": "1.2.1",
     "express": "4.13.4",
+    "socket.io": "^2.2.0",
     "utf-8-validate": "1.2.1"
   }
 }
