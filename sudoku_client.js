@@ -1,6 +1,6 @@
 var current_pos=0;
-var current_sudoku='';
-var keyset=[37,38,39,40,48,49,50,51,52,53,54,55,56,57,27];
+var current_sudoku=undefined;
+var keyset=[37,38,39,40,48,49,50,51,52,53,54,55,56,57,27,8];
 init();
 
 var socket=false;
@@ -28,28 +28,43 @@ function send_message(type,m) {
 
 function init() {
   var grid=document.getElementById("sudoku");
-  grid.style.textAlign='left';
-  var out="<style>body {text-align:left;font:22px 'Lucidia Console', Monaco, monospace}</style><div id=text></div> <a href=javascript:send_message('init','')>INIT</a> <a href=javascript:send_message('reset','')>RESET</a>";
-
   var g='';
-  g+='<style>.cr {clear:both}</style>';
-  g+='<style>.tc {display:table-cell;vertical-align:middle}</style>';
-  g+='<style>.f {float:left;text-align:center;display:table;margin:0.1rem;background-color:#00ff00;width:50px;height:50px;}</style>';
-  g+='<div class=cr></div><div id=0 class=f>NULL</div><div id=1 class=f>EINS</div><div id=2 class=f>ZWEI</div>';
 
-  grid.innerHTML=out+g;
+  g+="<style>body {font:22px 'Lucidia Console', Monaco, monospace;}</style>";
+  g+='<style>.wallpaper {background-color:#555;display:table;text-align:center;margin:auto}</style>';
+  g+='<style>.space {float:left;width:5px;height:5px}</style>';
+  g+='<style>.cr {clear:both}</style>';
+  g+='<style>.f {float:left;text-align:center;display:table;margin:1px;width:50px;height:50px;}</style>';
+  g+='<style>.tc {display:table-cell;vertical-align:middle}</style>';
+  g+='<div class=wallpaper>';
+  var i=0;
+  while (i<81) {
+    if (i%9==0) {g+='<div class=space></div><div class=cr></div>'}
+    if (i%3==0) {g+='<div class=space></div>'}
+    g+='<div id='+i+' class=f></div>';
+    i++;
+    if (i%27==0) {g+='<div class=cr></div>'}
+  }
+  g+='<div class=cr></div><div class=space></div></div>';
+  //g+="<br><div style=margin:auto;display:table;><a href=api/get>/api/get</a> &nbsp; <a href=javascript:send_message('init','')>INIT</a> &nbsp; <a href=javascript:send_message('reset','')>RESET</a> <div id=text></div><br>";
+
+  grid.style.textAlign='left';
+  grid.innerHTML=g;
   update(); 
 }
 
 function update() {
   var i=0;
-  while (i<3) {
+  while ((current_sudoku)&&(i<81)) {
   	var e=document.getElementById(i);
-  	e.style.background=(i==current_pos)?'#0444e0':'#f0f0f0';
-  	e.innerHTML=(current_sudoku.current)?(current_sudoku.current[i]>0?'<div class=tc>'+current_sudoku.current[i]+'</div>':''):'';
-		i++;
+    if (current_sudoku.current) {
+      if (current_sudoku.puzzle[i]>0) {e.style.color='#000'} else {e.style.color='#00c'}
+      if (i==current_pos) {e.style.background='#ccf'} else {e.style.background='#fafafa'}
+      e.innerHTML=(current_sudoku.current)?(current_sudoku.current[i]>0?'<div class=tc>'+current_sudoku.current[i]+'</div>':''):'';
+    }
+    i++;
   }
-  document.getElementById('text').innerHTML="current_pos="+current_pos+"<br>";
+  //document.getElementById('text').innerHTML="current_pos="+current_pos+"<br>";
 }
 
 document.onkeydown = function(event) {
@@ -69,7 +84,8 @@ document.onkeydown = function(event) {
       case 55: send_digit(7); break; // 7
       case 56: send_digit(8); break; // 8
       case 57: send_digit(9); break; // 9
-      case 27: init(); break; // ESC (QUIT/START)
+      case 27: send_digit(0); break; // ESC
+      case 8: send_digit(0); break; // BACKSPACE
     }
     event.cancelBubble = true;
     event.returnValue = false;
@@ -85,6 +101,4 @@ function change_pos(d) {
   update();
 }
 
-function log(m) {
-  console.log(m);
-}
+function log(m) {console.log(m)}

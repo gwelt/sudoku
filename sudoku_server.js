@@ -15,6 +15,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use('(/sudoku)?/$', function(req,res) {res.sendFile(path.join(__dirname, 'index.html'))}); //res.setHeader('Access-Control-Allow-Origin','*');
 app.use('(/sudoku)?/sudoku_client.js', function(req,res) {res.sendFile(path.join(__dirname, 'sudoku_client.js'))});
+app.use('(/sudoku)?/api/init$', function(req,res) {sudoku.init();res.send(JSON.stringify(sudoku))});
+app.use('(/sudoku)?/api/reset$', function(req,res) {sudoku.reset();res.send(JSON.stringify(sudoku))});
+app.use('(/sudoku)?/api/get$', function(req,res) {res.send(JSON.stringify(sudoku))});
 
 function Sudoku() {
   this.init();
@@ -37,7 +40,7 @@ Sudoku.prototype.set = function (pos,digit) {
     if (this.puzzle[pos]=='-') {
       if (digit==0) {digit='-'}
       this.current=this.current.substr(0,pos)+digit+this.current.substr(pos+1,81-pos-1);
-      log('SET '+pos+'='+digit);
+      //log('SET '+pos+'='+digit);
       broadcast(this);
     }
   }
