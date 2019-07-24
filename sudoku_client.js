@@ -27,14 +27,18 @@ function send_message(type,m) {
 }
 
 function init() {
-  var grid=document.getElementById("sudoku");
-  var g='';
+  var width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+  var height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+  var s=50;
+  if (width>height) {s=height/10.5} else {s=width/12};
+  var fs=s/2.5;
 
-  g+="<style>body {font:22px 'Lucidia Console', Monaco, monospace;}</style>";
+  var g='';
+  g+="<style>body {font:"+fs+"px 'Lucidia Console', Monaco, monospace; margin:0.5rem; padding:0.5rem;}</style>";
   g+='<style>.wallpaper {background-color:#555;display:table;text-align:center;margin:auto}</style>';
-  g+='<style>.space {float:left;width:5px;height:5px}</style>';
+  g+='<style>.space {float:left;width:0.5rem;height:0.5rem}</style>';
   g+='<style>.cr {clear:both}</style>';
-  g+='<style>.f {float:left;text-align:center;display:table;margin:1px;width:50px;height:50px;}</style>';
+  g+='<style>.f {float:left;text-align:center;display:table;margin:0.1rem;width:'+s+'px;height:'+s+'px;}</style>';
   g+='<style>.tc {display:table-cell;vertical-align:middle}</style>';
   g+='<div class=wallpaper>';
   var i=0;
@@ -48,6 +52,7 @@ function init() {
   g+='<div class=cr></div><div class=space></div></div>';
   //g+="<br><div style=margin:auto;display:table;><a href=api/get>/api/get</a> &nbsp; <a href=javascript:send_message('init','')>INIT</a> &nbsp; <a href=javascript:send_message('reset','')>RESET</a> <div id=text></div><br>";
 
+  var grid=document.getElementById("sudoku");
   grid.style.textAlign='left';
   grid.innerHTML=g;
   update(); 
