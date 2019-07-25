@@ -30,17 +30,17 @@ function init() {
   var width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
   var height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
   var s=50;
-  if (width>height) {s=height/10.5} else {s=width/12};
-  var fs=s/2.5;
+  if (width>height) {s=(height-50)/10.5} else {s=(width-50)/10.5};
+  var fs=s/2.25;
 
   var g='';
-  g+="<style>body {font:"+fs+"px 'Lucidia Console', Monaco, monospace; margin:0.5rem; padding:0.5rem;}</style>";
-  g+='<style>.wallpaper {background-color:#555;display:table;text-align:center;margin:auto}</style>';
-  g+='<style>.space {float:left;width:0.5rem;height:0.5rem}</style>';
+  g+="<style>body {font:"+fs+"px 'Lucidia Console', Monaco, monospace; margin:20px;}</style>";
+  g+='<style>.wallpaper {nobackground-color:#fff;display:table;text-align:center;margin:auto}</style>';
+  g+='<style>.space {float:left;width:4px;height:4px}</style>';
   g+='<style>.cr {clear:both}</style>';
-  g+='<style>.f {float:left;text-align:center;display:table;margin:0.1rem;width:'+s+'px;height:'+s+'px;}</style>';
+  g+='<style>.f {float:left;text-align:center;display:table;margin:1px;width:'+s+'px;height:'+s+'px;}</style>';
   g+='<style>.tc {display:table-cell;vertical-align:middle}</style>';
-  g+='<div class=wallpaper>';
+  g+='<div id=wallpaper class=wallpaper>';
   var i=0;
   while (i<81) {
     if (i%9==0) {g+='<div class=space></div><div class=cr></div>'}
@@ -55,19 +55,20 @@ function init() {
   var grid=document.getElementById("sudoku");
   grid.style.textAlign='left';
   grid.innerHTML=g;
-  update(); 
+  update();
 }
 
 function update() {
   var i=0;
   while ((current_sudoku)&&(i<81)) {
-  	var e=document.getElementById(i);
+    var e=document.getElementById(i);
     if (current_sudoku.current) {
-      if (current_sudoku.puzzle[i]>0) {e.style.color='#000'} else {e.style.color='#00c'}
-      if (i==current_pos) {e.style.background='#ccf'} else {e.style.background='#fafafa'}
-      e.innerHTML=(current_sudoku.current)?(current_sudoku.current[i]>0?'<div class=tc>'+current_sudoku.current[i]+'</div>':''):'';
+      if (current_sudoku.puzzle[i]>0) {e.style.color='#000'} else {e.style.color='#080'}
+      if (i==current_pos) {e.style.background='#cfc'} else {e.style.background='#fafafa'}
+      e.innerHTML='<div class=tc>'+(current_sudoku.current[i]>0?current_sudoku.current[i]:'')+'</div>';
     }
     i++;
+    if (i==81) {document.getElementById('wallpaper').style.background='#ccc'};
   }
   //document.getElementById('text').innerHTML="current_pos="+current_pos+"<br>";
 }
