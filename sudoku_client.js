@@ -18,7 +18,7 @@ function SocketIO() {if (!socket) {loadScript('/sudoku/socket.io/socket.io.js', 
   socket = io.connect('', { 'path': '/sudoku/socket.io' });
   socket.on('sudoku', function (msg) {log(msg); current_sudoku=diff(JSON.parse(msg)); update()});
   socket.on('message', function (msg) {log(msg)});
-  socket.on('disconnect', function (msg) {socket.close(); log('DISCONNECTED '+msg)});
+  socket.on('disconnect', function (msg) {socket.close(); alert('Disconnected. Please reload.'); log('DISCONNECTED '+msg)});
 })}};
 
 function diff(new_sudoku) {
@@ -46,24 +46,17 @@ function init() {
 
   var s=0;
   if (width>height) {s=(height-50)/10} else {s=(width-50)/10};
-  var fs=s/2.25;
+  var fs=s/2;
 
   var g='';
   g+="<style>body {font:"+fs+"px 'Lucidia Console', Monaco, monospace; margin:25px 0px 0px 0px;}</style>";
 
   g+='<style>.wallpaper {display:table;text-align:center;margin:auto}</style>';
-  g+='<style>.modal {display:none; justify-content:space-around; width:10px; height:10px; position:absolute; text-align:center; margin:auto; background-color:rgba(255, 255, 255, 1);}</style>';
+  g+='<style>.modal {display:none; justify-content:space-around; width:10px; height:10px; position:absolute; text-align:center; margin:auto; background-color:#fff;}</style>';
 
   g+='<style>.space {float:left;width:4px;height:4px}</style>';
   g+='<style>.cr {clear:both}</style>';
   g+='<style>.f {cursor:pointer;float:left;text-align:center;display:table;margin:1px;width:'+s+'px;height:'+s+'px;}</style>';
-  g+='<style>.ftrans {cursor:pointer;float:left;text-align:center;display:table;margin:1px;width:'+s+'px;height:'+s+'px;}</style>';
-
-  //  -moz-transition: all .2s ease-in;
-  //  -o-transition: all .2s ease-in;
-  //  -webkit-transition: all .2s ease-in;
-  //  transition: all .2s ease-in;
-
   g+='<style>.f2 {cursor:pointer;float:left;text-align:center;display:table;margin:6px;width:'+s*2.8+'px;height:'+s*2+'px;font-size:3em;}</style>';
   g+='<style>.tc {display:table-cell;vertical-align:middle}</style>';
 
@@ -109,10 +102,9 @@ function update() {
       if (current_sudoku.puzzle[i]>0) {e.style.color='#000'} else {e.style.color='#080'}
 
       e.style.background='#fafafa';
-      e.classList.remove('ftrans');
-      if (i==current_sudoku.diff) {e.style.background='#ffa'; e.classList.add('ftrans'); current_sudoku.diff=-1; setTimeout(function(){update()},2500); }
+      if (i==current_sudoku.diff) {current_sudoku.diff=-1; e.style.background='#ff8'; e.style.transition='all 0.6s'; setTimeout(function(){update()},1500); }
+      if (i==current_pos) {e.style.background='#cfc'; e.style.transition=''};
 
-      if (i==current_pos) {e.style.background='#cfc'};
       e.innerHTML='<div class=tc onclick=showmodal('+i+')>'+(current_sudoku.current[i]>0?current_sudoku.current[i]:'')+'</div>';
     }
     i++;
@@ -122,6 +114,7 @@ function update() {
 
 function showmodal(p) {
   current_pos=p;
+  update();
   if (current_sudoku.puzzle[current_pos]=='-') {
     if (current_sudoku.current[current_pos]=='-') {document.getElementById('put0').style.background='#cfc'} else {document.getElementById('put0').style.background='#ddd'};
     document.getElementById('back').style.background='#ddd';
@@ -133,7 +126,6 @@ function showmodal(p) {
     }
     document.getElementById('modal').style.display='flex';
   }
-  update();
 }
 
 document.onkeydown = function(event) {
