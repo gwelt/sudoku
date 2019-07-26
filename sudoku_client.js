@@ -16,10 +16,20 @@ if (useSocketIO) {setTimeout(function(){SocketIO()},0)};
 
 function SocketIO() {if (!socket) {loadScript('/sudoku/socket.io/socket.io.js', function() {
   socket = io.connect('', { 'path': '/sudoku/socket.io' });
-  socket.on('sudoku', function (msg) {log(msg); current_sudoku=JSON.parse(msg); update()});
+  socket.on('sudoku', function (msg) {log(msg); current_sudoku=diff(JSON.parse(msg)); update()});
   socket.on('message', function (msg) {log(msg)});
   socket.on('disconnect', function (msg) {socket.close(); log('DISCONNECTED '+msg)});
 })}};
+
+function diff(new_sudoku) {
+  new_sudoku.diff=-1;
+  var i=0;
+  while ((i<81)&&(new_sudoku.diff==-1)) {
+    if ((current_sudoku)&&(new_sudoku.current[i]!==current_sudoku.current[i])) {new_sudoku.diff=i}
+    i++;
+  }
+  return new_sudoku;
+}
 
 function send_digit(digit) {send_message('put',{'pos':current_pos,'digit':digit})}
 function send_message(type,m) {
@@ -27,9 +37,14 @@ function send_message(type,m) {
 }
 
 function init() {
-  var width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-  var height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-  var s=50;
+  var w_width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+  var w_height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+  var d_width = socket?false:document.getElementById('sudoku').offsetWidth;
+  var d_height = socket?false:document.getElementById('sudoku').offsetHeight;
+  var width = (d_width||w_width);
+  var height = (d_height||w_height);
+
+  var s=0;
   if (width>height) {s=(height-50)/10} else {s=(width-50)/10};
   var fs=s/2.25;
 
@@ -42,6 +57,13 @@ function init() {
   g+='<style>.space {float:left;width:4px;height:4px}</style>';
   g+='<style>.cr {clear:both}</style>';
   g+='<style>.f {cursor:pointer;float:left;text-align:center;display:table;margin:1px;width:'+s+'px;height:'+s+'px;}</style>';
+  g+='<style>.ftrans {cursor:pointer;float:left;text-align:center;display:table;margin:1px;width:'+s+'px;height:'+s+'px;}</style>';
+
+  //  -moz-transition: all .2s ease-in;
+  //  -o-transition: all .2s ease-in;
+  //  -webkit-transition: all .2s ease-in;
+  //  transition: all .2s ease-in;
+
   g+='<style>.f2 {cursor:pointer;float:left;text-align:center;display:table;margin:6px;width:'+s*2.8+'px;height:'+s*2+'px;font-size:3em;}</style>';
   g+='<style>.tc {display:table-cell;vertical-align:middle}</style>';
 
@@ -82,16 +104,36 @@ function init() {
 function update() {
   var i=0;
   while ((current_sudoku)&&(i<81)) {
-    var e=document.getElementById(i);
     if (current_sudoku.current) {
+      var e=document.getElementById(i);
       if (current_sudoku.puzzle[i]>0) {e.style.color='#000'} else {e.style.color='#080'}
-      if (i==current_pos) {e.style.background='#cfc'} else {e.style.background='#fafafa'}
-      e.innerHTML='<div class=tc onclick=modal('+i+')>'+(current_sudoku.current[i]>0?current_sudoku.current[i]:'')+'</div>';
+
+      e.style.background='#fafafa';
+      e.classList.remove('ftrans');
+      if (i==current_sudoku.diff) {e.style.background='#ffa'; e.classList.add('ftrans'); current_sudoku.diff=-1; setTimeout(function(){update()},2500); }
+
+      if (i==current_pos) {e.style.background='#cfc'};
+      e.innerHTML='<div class=tc onclick=showmodal('+i+')>'+(current_sudoku.current[i]>0?current_sudoku.current[i]:'')+'</div>';
     }
     i++;
     if (i==81) {document.getElementById('wallpaper').style.background='#ccc'};
   }
-  //document.getElementById('text').innerHTML="current_pos="+current_pos+"<br>";
+}
+
+function showmodal(p) {
+  current_pos=p;
+  if (current_sudoku.puzzle[current_pos]=='-') {
+    if (current_sudoku.current[current_pos]=='-') {document.getElementById('put0').style.background='#cfc'} else {document.getElementById('put0').style.background='#ddd'};
+    document.getElementById('back').style.background='#ddd';
+    var i=1;
+    while (i<10) {
+      var e=document.getElementById('put'+i);
+      if (current_sudoku.current[current_pos]==i) {e.style.background='#beb'} else {e.style.background='#ddd'}
+      i++;
+    }
+    document.getElementById('modal').style.display='flex';
+  }
+  update();
 }
 
 document.onkeydown = function(event) {
@@ -118,22 +160,6 @@ document.onkeydown = function(event) {
     event.returnValue = false;
   }
   return event.returnValue;
-}
-
-function modal(p) {
-  current_pos=p;
-  if (current_sudoku.puzzle[current_pos]=='-') {
-    if (current_sudoku.current[current_pos]=='-') {document.getElementById('put0').style.background='#cfc'} else {document.getElementById('put0').style.background='#ddd'};
-    document.getElementById('back').style.background='#ddd';
-    var i=1;
-    while (i<10) {
-      var e=document.getElementById('put'+i);
-      if (current_sudoku.current[current_pos]==i) {e.style.background='#beb'} else {e.style.background='#ddd'}
-      i++;
-    }
-    document.getElementById('modal').style.display='flex';
-  }
-  update();
 }
 
 function change_pos(d) {
