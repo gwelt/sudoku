@@ -30,31 +30,35 @@ function init() {
   var width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
   var height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
   var s=50;
-  if (width>height) {s=(height-50)/10.5} else {s=(width-50)/10.5};
+  if (width>height) {s=(height-50)/10} else {s=(width-50)/10};
   var fs=s/2.25;
 
   var g='';
-  g+="<style>body {font:"+fs+"px 'Lucidia Console', Monaco, monospace; margin:20px;}</style>";
+  g+="<style>body {font:"+fs+"px 'Lucidia Console', Monaco, monospace; margin:25px 0px 0px 0px;}</style>";
 
   g+='<style>.wallpaper {display:table;text-align:center;margin:auto}</style>';
-  g+='<style>.modal {display:none; width:10px; height:10px; position:absolute; text-align:center; margin:auto; background-color:#fff;}</style>';
+  g+='<style>.modal {display:none; justify-content:space-around; width:10px; height:10px; position:absolute; text-align:center; margin:auto; background-color:rgba(255, 255, 255, 1);}</style>';
 
   g+='<style>.space {float:left;width:4px;height:4px}</style>';
   g+='<style>.cr {clear:both}</style>';
-  g+='<style>.f {float:left;text-align:center;display:table;margin:1px;width:'+s+'px;height:'+s+'px;}</style>';
+  g+='<style>.f {cursor:pointer;float:left;text-align:center;display:table;margin:1px;width:'+s+'px;height:'+s+'px;}</style>';
+  g+='<style>.f2 {cursor:pointer;float:left;text-align:center;display:table;margin:6px;width:'+s*2.8+'px;height:'+s*2+'px;font-size:3em;}</style>';
   g+='<style>.tc {display:table-cell;vertical-align:middle}</style>';
 
   g+='<div id=wallpaper class=wallpaper>';
-  
+
   g+='<div id=modal class=modal><div class=tc>';
   var i=1;
   while (i<10) {
-    g+='<div class=f><div id=put'+i+' class=tc onclick=javascript:send_digit('+i+');javascript:document.getElementById("modal").style.display="none">'+i+'</div></div>';
+    g+='<div class=f2><div id=put'+i+' class=tc onclick=javascript:send_digit('+i+');javascript:document.getElementById("modal").style.display="none">'+i+'</div></div>';
+    if (i%3==0) {g+='<div class=cr></div>'}
     i++;
   }
-  g+='<br><div class=f><div id=put0 class=tc onclick=javascript:send_digit(0);javascript:document.getElementById("modal").style.display="none">empty</div></div>';
+  g+='<div class=f2><div id=back class=tc onclick=javascript:document.getElementById("modal").style.display="none">&lt;</div></div>';
+  g+='<div class=f2><div></div></div>';
+  g+='<div class=f2><div id=put0 class=tc onclick=javascript:send_digit(0);javascript:document.getElementById("modal").style.display="none">-</div></div>';
   g+='</div></div>';
-  
+
   var i=0;
   while (i<81) {
     if (i%9==0) {g+='<div class=space></div><div class=cr></div>'}
@@ -117,16 +121,17 @@ document.onkeydown = function(event) {
 }
 
 function modal(p) {
-  current_pos=p; 
+  current_pos=p;
   if (current_sudoku.puzzle[current_pos]=='-') {
-    if (current_sudoku.current[current_pos]=='-') {document.getElementById('put0').style.background='#cfc'} else {document.getElementById('put0').style.background='#fafafa'};
+    if (current_sudoku.current[current_pos]=='-') {document.getElementById('put0').style.background='#cfc'} else {document.getElementById('put0').style.background='#ddd'};
+    document.getElementById('back').style.background='#ddd';
     var i=1;
     while (i<10) {
       var e=document.getElementById('put'+i);
-      if (current_sudoku.current[current_pos]==i) {e.style.background='#cfc'} else {e.style.background='#fafafa'}
+      if (current_sudoku.current[current_pos]==i) {e.style.background='#beb'} else {e.style.background='#ddd'}
       i++;
     }
-    document.getElementById('modal').style.display='table';   
+    document.getElementById('modal').style.display='flex';
   }
   update();
 }
