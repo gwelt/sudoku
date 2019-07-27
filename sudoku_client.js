@@ -108,10 +108,11 @@ function update() {
       if (current_sudoku.puzzle[i]>0) {e.style.color='#000'} else {e.style.color='#080'}
 
       e.style.background='#fafafa';
+      if ((current_sudoku.current[i]==current_sudoku.current[current_pos])&&(current_sudoku.current[i]!='-')) {e.style.background='#eee'};// else {e.style.fontWeight='normal'}
       if (i==current_sudoku.diff) {current_sudoku.diff=-1; e.style.background='#ff8'; e.style.transition='all 0.6s'; setTimeout(function(){update()},1500); }
       if (i==current_pos) {e.style.background='#cfc'; e.style.transition=''};
 
-      e.innerHTML='<div class=tc onclick=show_modal('+i+')>'+(current_sudoku.current[i]>0?current_sudoku.current[i]:'')+'</div>';
+      e.innerHTML='<div class=tc onclick=show_modal('+i+')>'+(current_sudoku.current[i]>0?current_sudoku.current[i]:'&nbsp;')+'</div>';
     }
     i++;
     if (i==81) {document.getElementById('wallpaper').style.background='#ccc'};
@@ -119,7 +120,7 @@ function update() {
 }
 
 function show_modal(p) {
-  current_pos=p||current_pos;
+  if (p!=undefined) {current_pos=p};
   update();
   if ((socket)&&(current_sudoku.puzzle[current_pos]=='-')) {
     if (current_sudoku.current[current_pos]=='-') {document.getElementById('put0').style.background='#cfc'} else {document.getElementById('put0').style.background='#ddd'};
