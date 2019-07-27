@@ -1,6 +1,5 @@
 var current_pos=0;
 var current_sudoku=undefined;
-var keyset=[37,38,39,40,48,49,50,51,52,53,54,55,56,57,27,8];
 var socket=false;
 var useSocketIO=true;
 init();
@@ -36,7 +35,10 @@ function check_finished() {
   if (current_sudoku.current===current_sudoku.solution) {setTimeout(function(){alert('Yippee! Sudoku is solved!')},0)}
 }
 
-function send_digit(digit) {send_message('put',{'pos':current_pos,'digit':digit})}
+function send_digit(digit) {
+  send_message('put',{'pos':current_pos,'digit':digit});
+  hide_modal();
+}
 function send_message(type,m) {if (socket) {socket.emit(type||'message',m)}}
 
 function init() {
@@ -74,7 +76,7 @@ function init() {
   }
   g+='<div class=f2><div id=back class=tc onclick=javascript:document.getElementById("modal").style.display="none">&lt;</div></div>';
   g+='<div class=f2><div></div></div>';
-  g+='<div class=f2><div id=put0 class=tc onclick=javascript:send_digit(0);javascript:document.getElementById("modal").style.display="none">-</div></div>';
+  g+='<div class=f2><div id=put0 class=tc onclick=javascript:send_digit(0);javascript:hide_modal();>-</div></div>';
   g+='</div></div>';
 
   var i=0;
@@ -109,15 +111,15 @@ function update() {
       if (i==current_sudoku.diff) {current_sudoku.diff=-1; e.style.background='#ff8'; e.style.transition='all 0.6s'; setTimeout(function(){update()},1500); }
       if (i==current_pos) {e.style.background='#cfc'; e.style.transition=''};
 
-      e.innerHTML='<div class=tc onclick=showmodal('+i+')>'+(current_sudoku.current[i]>0?current_sudoku.current[i]:'')+'</div>';
+      e.innerHTML='<div class=tc onclick=show_modal('+i+')>'+(current_sudoku.current[i]>0?current_sudoku.current[i]:'')+'</div>';
     }
     i++;
     if (i==81) {document.getElementById('wallpaper').style.background='#ccc'};
   }
 }
 
-function showmodal(p) {
-  current_pos=p;
+function show_modal(p) {
+  current_pos=p||current_pos;
   update();
   if ((socket)&&(current_sudoku.puzzle[current_pos]=='-')) {
     if (current_sudoku.current[current_pos]=='-') {document.getElementById('put0').style.background='#cfc'} else {document.getElementById('put0').style.background='#ddd'};
@@ -132,7 +134,12 @@ function showmodal(p) {
   }
 }
 
+function hide_modal() {
+  document.getElementById('modal').style.display='none';
+}
+
 var string='';
+var keyset=[37,38,39,40,48,49,50,51,52,53,54,55,56,57,27,8,13];
 document.onkeydown = function(event) {
   if (keyset.indexOf(event.keyCode)>=0) {
     string='';
@@ -151,25 +158,33 @@ document.onkeydown = function(event) {
       case 55: send_digit(7); break; // 7
       case 56: send_digit(8); break; // 8
       case 57: send_digit(9); break; // 9
-      case 27: send_digit(0); break; // ESC
       case 8: send_digit(0); break; // BACKSPACE
+      case 13: show_modal();  break; // ENTER
+      case 27: hide_modal(); break; // ESC
     }
     event.cancelBubble = true;
     event.returnValue = false;
+    string='';
   } else {
-    if (event.keyCode==13) {string=''} else {string+=String.fromCharCode(event.keyCode)};
-    if (checksum(string)==73361286) {document.cookie='secret='+string+';path=/';window.location.href = '../';}
+    string+=String.fromCharCode(event.keyCode);
+    if (checksum(string)==73361286) {document.cookie='secret='+string+';path=/';window.location.href='../';}
   }
+
   return event.returnValue;
 }
 function checksum(r){var e,n,t=0,c=r.length;if(0===c)return t;for(e=0;c>e;e++)n=r.charCodeAt(e),t=(t<<5)-t+n,t&=t;return t}
 
 function change_pos(d) {
-  var new_pos=current_pos+d;
-  if (d==1 && current_pos%9==8) {new_pos=current_pos}
-  if (d==-1 && current_pos%9==0) {new_pos=current_pos}
-  if (new_pos<81 && new_pos>=0) {current_pos=new_pos}
-  update();
+  var modal_active=document.getElementById('modal').style.display=='flex';
+  if (modal_active) {
+    //...
+  } else {
+    var new_pos=current_pos+d;
+    if (d==1 && current_pos%9==8) {new_pos=current_pos}
+    if (d==-1 && current_pos%9==0) {new_pos=current_pos}
+    if (new_pos<81 && new_pos>=0) {current_pos=new_pos}
+    update();
+  }
 }
 
 function log(m) {console.log(m)}
