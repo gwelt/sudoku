@@ -1,10 +1,9 @@
 var current_pos=0;
 var current_sudoku=undefined;
 var keyset=[37,38,39,40,48,49,50,51,52,53,54,55,56,57,27,8];
-init();
-
 var socket=false;
 var useSocketIO=true;
+init();
 
 function loadScript(src, done) {
   var js = document.createElement('script');
@@ -18,13 +17,10 @@ function SocketIO() {if (!socket) {loadScript('/sudoku/socket.io/socket.io.js', 
   socket = io.connect('', { 'path': '/sudoku/socket.io' });
   socket.on('sudoku', function (msg) {log(msg); current_sudoku=diff(JSON.parse(msg)); update(); check_finished();});
   socket.on('message', function (msg) {log(msg)});
-  socket.on('disconnect', function (msg) {socket.close(); alert('Disconnected. Please reload.'); log('DISCONNECTED '+msg)});
+  socket.on('connect', function (msg) {log('CONNECTED '+msg)});
+  socket.on('disconnect', function (msg) {log('DISCONNECTED '+msg)});
   socket.on('reconnect', function (msg) {log('RECONNECTED '+msg)});
 })}};
-
-function check_finished() {
-  if (current_sudoku.current===current_sudoku.solution) {setTimeout(function(){alert('Yippee! Sudoku is solved!')},0)}
-}
 
 function diff(new_sudoku) {
   new_sudoku.diff=-1;
@@ -34,6 +30,10 @@ function diff(new_sudoku) {
     i++;
   }
   return new_sudoku;
+}
+
+function check_finished() {
+  if (current_sudoku.current===current_sudoku.solution) {setTimeout(function(){alert('Yippee! Sudoku is solved!')},0)}
 }
 
 function send_digit(digit) {send_message('put',{'pos':current_pos,'digit':digit})}
@@ -98,7 +98,7 @@ function init() {
 }
 
 function update() {
-  if ((socket)&&(socket.disconnected)) {SocketIO()}
+  if ((socket)&&(socket.disconnected)) {socket.connect();}
   var i=0;
   while ((current_sudoku)&&(i<81)) {
     if (current_sudoku.current) {
