@@ -131,7 +131,7 @@ function show_modal(p) {
       if (current_sudoku.current[current_pos]==i) {e.style.background='#beb'} else {e.style.background='#ddd'}
       i++;
     }
-    document.getElementById('modal').style.display='flex';
+    if (document.getElementById('modal').style.display=='flex') {hide_modal()} else {document.getElementById('modal').style.display='flex';};
   }
 }
 
